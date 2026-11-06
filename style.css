@@ -502,3 +502,5 @@ html[dir=rtl] .rv figcaption b{direction:ltr;unicode-bidi:isolate;text-align:rig
   .sv-art-l{-webkit-mask-image:linear-gradient(90deg,#000 55%,transparent),linear-gradient(180deg,#000 82%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,#000 55%,transparent),linear-gradient(180deg,#000 82%,transparent);mask-composite:intersect}
   .sv-art-r{-webkit-mask-image:linear-gradient(270deg,#000 55%,transparent),linear-gradient(180deg,#000 82%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(270deg,#000 55%,transparent),linear-gradient(180deg,#000 82%,transparent);mask-composite:intersect}
 }
+
+.info a{overflow-wrap:anywhere}
