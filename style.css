@@ -504,3 +504,25 @@ html[dir=rtl] .rv figcaption b{direction:ltr;unicode-bidi:isolate;text-align:rig
 }
 
 .info a{overflow-wrap:anywhere}
+
+/* Tablet: üst menü tek satır kalsın (dil seçici eklendikten sonra sığmıyordu) */
+.menu a{white-space:nowrap}
+@media(min-width:821px) and (max-width:1180px){
+  .head-in{gap:16px}
+  .menu{gap:16px;font-size:.9rem}
+  .head-act .btn-sm{display:none}
+}
+@media(min-width:821px) and (max-width:920px){
+  .menu{gap:12px;font-size:.84rem}
+  .logo i{display:none}
+}
+
+/* Markalar: geçişte nefes payı (Hizmetler görselleri ile Markalar görselleri arasında boşluk) */
+@media(min-width:701px){
+  #markalar{padding-top:150px}
+  .mk-art{top:70px}
+}
+@media(min-width:1100px){
+  .sv-art-l{-webkit-mask-image:linear-gradient(90deg,#000 55%,transparent),linear-gradient(180deg,#000 60%,transparent);mask-image:linear-gradient(90deg,#000 55%,transparent),linear-gradient(180deg,#000 60%,transparent)}
+  .sv-art-r{-webkit-mask-image:linear-gradient(270deg,#000 55%,transparent),linear-gradient(180deg,#000 60%,transparent);mask-image:linear-gradient(270deg,#000 55%,transparent),linear-gradient(180deg,#000 60%,transparent)}
+}
