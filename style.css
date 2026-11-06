@@ -1,6 +1,6 @@
 :root{color-scheme:light;
   --bg:#f7f7f4;--alt:#f2f1ed;--fg:#26251e;--muted:#5b5a53;--card:#fdfdfb;--border:#e6e5e0;
-  --ink:#26251e;--ink-fg:#f7f7f4;--sand:#f1ebdd;--fy:#d4d4bb;--ctabg:#ebddcb;--sage:#d5d6c6;--cr2:#f4ede3;--svc:#eee1ce;--olv:#e8ecde;--gld:#f6ebd2;--dot:rgba(78,88,68,.16);--acc:#c39b5f;--ember:#8a6428;--olive:#4e5844;--wa:#4e5844;--wa-fg:#fff;--r:22px;
+  --ink:#26251e;--ink-fg:#f7f7f4;--sand:#f1ebdd;--fy:#d4d4bb;--ctabg:#ebddcb;--sage:#e8e1ce;--cr2:#f4ede3;--svc:#eee1ce;--olv:#e8ecde;--gld:#f6ebd2;--dot:rgba(78,88,68,.16);--acc:#c39b5f;--ember:#8a6428;--olive:#4e5844;--wa:#4e5844;--wa-fg:#fff;--r:22px;
   --fh:'Satoshi','Segoe UI',system-ui,sans-serif;--fb:'Satoshi','Segoe UI',system-ui,sans-serif;
 }
 
@@ -301,7 +301,7 @@ input.bad{border-color:#d33}
 #hizmetler .card{background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-color:rgba(255,255,255,.7)}
 
 /* Markalar: adaçayı keten zemin */
-#markalar{position:relative;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .55' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E")}
+#markalar{position:relative;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9 .55' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .36 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E")}
 #markalar .chip{background:#fff}
 .lt{box-shadow:0 8px 22px -14px rgba(60,62,45,.45);border-color:rgba(255,255,255,.8)}
 .at{box-shadow:0 8px 22px -14px rgba(60,62,45,.45);border-color:rgba(255,255,255,.8)}
@@ -426,3 +426,64 @@ html[dir=rtl] .hero-txt,html[dir=rtl] .sec-h.left{text-align:start}
 /* Arapçada marka, telefon ve kullanıcı adı soldan sağa kalır */
 .logo{direction:ltr}
 html[dir=rtl] .info a{display:inline-block;direction:ltr;unicode-bidi:isolate}
+
+/* Markalar: köşe görselleri (pencere gölgesi, kabartma zeytin dalı) */
+#markalar{overflow:hidden}
+#markalar>*:not(.mk-art){position:relative;z-index:1}
+.mk-art{position:absolute;top:0;z-index:0;height:auto;pointer-events:none;user-select:none}
+.mk-art-l{left:0;width:clamp(220px,30vw,430px);-webkit-mask-image:linear-gradient(90deg,#000 55%,transparent),linear-gradient(180deg,#000 55%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,#000 55%,transparent),linear-gradient(180deg,#000 55%,transparent);mask-composite:intersect}
+.mk-art-r{right:0;width:clamp(260px,42vw,640px);-webkit-mask-image:linear-gradient(270deg,#000 55%,transparent),linear-gradient(180deg,#000 55%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(270deg,#000 55%,transparent),linear-gradient(180deg,#000 55%,transparent);mask-composite:intersect}
+
+/* Duyarlılık düzeltmeleri */
+.ig-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:820px){
+  .ig-txt{display:none}
+  .head-act{margin-inline-start:auto}
+}
+@media(max-width:820px){
+  .head-in{gap:10px}
+  .head-act{gap:8px}
+  .lang button{min-width:36px;min-height:36px;padding:0 6px;display:inline-grid;place-items:center}
+  .burger{width:40px;height:40px}
+}
+@media(max-width:420px){
+  .ig{gap:10px;padding:10px 12px}
+  .ig-badge{width:40px;height:40px}
+  .ig-badge svg{width:22px;height:22px}
+  .ig-name{font-size:1rem}
+  .ig-name small{font-size:.66rem}
+  .ig-go{padding:9px 13px;font-size:.88rem}
+}
+@media(max-width:380px){
+  .logo i{display:none}
+  .lang{padding:2px}
+  .lang button{min-width:33px;min-height:34px;padding:0 4px}
+  .burger{width:38px}
+}
+@media(max-width:360px){
+  .ig{gap:8px;padding:9px 10px}
+  .ig-badge{width:36px;height:36px}
+  .ig-name{font-size:.95rem}
+  .ig-name small{display:none}
+  .ig-go{padding:8px 12px;font-size:.84rem}
+}
+
+/* Dokunma alanını görünümü değiştirmeden büyüt */
+.lang button{position:relative}
+.lang button::after{content:"";position:absolute;inset:-6px -2px}
+@media(max-width:420px){.ig-name small{font-size:.72rem}}
+@media(max-width:380px){.burger{width:40px}}
+
+/* Dar ekranda örnek yazılar kesilmesin; Arapçada kısaltmalı adlar soldan sağa kalsın */
+@media(max-width:560px){
+  .fin input::placeholder{font-size:.84rem}
+  .fin input{padding-right:40px}
+  html[dir=rtl] .fin input{padding:12px 14px 12px 40px}
+}
+html[dir=rtl] .rv figcaption b{direction:ltr;unicode-bidi:isolate;text-align:right}
+
+/* En dar ekranlar: il/ilçe ve hesaplayıcı alanları tek sütun */
+@media(max-width:380px){
+  .quick .two:first-of-type{grid-template-columns:1fr}
+  .calc .two{grid-template-columns:1fr}
+}
