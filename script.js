@@ -2,7 +2,14 @@
   var root=document.documentElement, $=function(s,c){return (c||document).querySelector(s)};
   var NUM='905363133321';
   var anim=root.classList.contains('js-anim');
-  var wa=function(t){return 'https://wa.me/'+NUM+'?text='+encodeURIComponent(t)};
+  var T=window.PA_T||function(s){return s};            // seçili dile çeviri (Türkçe kaynak metinden)
+  var hooks=window.PA_hooks||[];                        // dil değişince çalışacak yenileyiciler
+  // WhatsApp mesajı işletmenin okuyacağı dilde (Türkçe) hazırlanır; site dili farklıysa not eklenir.
+  var wa=function(t){
+    var l=window.PA_lang?window.PA_lang():'tr';
+    if(l!=='tr')t+='\n(Site dili / Language: '+(l==='en'?'English':'العربية')+')';
+    return 'https://wa.me/'+NUM+'?text='+encodeURIComponent(t);
+  };
   var sayi=function(v){var n=parseFloat(String(v).replace(',','.'));return isFinite(n)&&n>0?n:NaN};
   var fmt=function(n){return String(Math.round(n*100)/100).replace('.',',')};
 
@@ -15,13 +22,17 @@
     setTimeout(function(){pre.remove();root.classList.remove('pre-on')},2400);
   }else{ if(pre)pre.remove(); requestAnimationFrame(basla); }
 
-  // ---- Başlığı kelime kelime böl ----
-  var h1=$('#h1');
-  if(h1&&anim){
-    var words=h1.textContent.trim().split(/\s+/);
-    h1.setAttribute('aria-label',h1.textContent.trim());
-    h1.innerHTML=words.map(function(w,i){return '<span class="w" aria-hidden="true"><span style="--i:'+i+'">'+w+'</span></span>'}).join(' ');
+  // ---- Başlığı kelime kelime böl (dil değişince yeniden kurulur) ----
+  var h1=$('#h1'),H1TR=h1?h1.textContent.trim():'';
+  function setH1(text){
+    if(!h1)return;
+    h1.setAttribute('aria-label',text);
+    if(anim){
+      h1.innerHTML=text.split(/\s+/).map(function(w,i){return '<span class="w" aria-hidden="true"><span style="--i:'+i+'">'+w+'</span></span>'}).join(' ');
+    }else h1.textContent=text;
   }
+  setH1(H1TR);
+  hooks.push(function(){setH1(T(H1TR))});
 
   // ---- Görünüme girince belirme ----
   var els=[].slice.call(document.querySelectorAll('[data-r]'));
@@ -52,12 +63,6 @@
   menu.addEventListener('click',function(e){if(e.target.tagName==='A'){menu.classList.remove('open');bg.setAttribute('aria-expanded','false')}});
   addEventListener('keydown',function(e){if(e.key==='Escape'){menu.classList.remove('open');bg.setAttribute('aria-expanded','false');lb.hidden=true}});
 
-  // ---- Tema ----
-  $('#theme').onclick=function(){
-    var dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
-    var t=dark?'light':'dark';root.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}
-  };
-
   // ---- Mıknatıslı butonlar (yalnız fare, hareket tercihi yoksa) ----
   if(anim&&matchMedia('(pointer:fine)').matches){
     document.querySelectorAll('.mag').forEach(function(b){
@@ -74,7 +79,7 @@
   function ilceDoldur(){
     var l=ILL[ilS.value]||[];
     ilceS.innerHTML='';
-    ilceS.appendChild(opt('',l.length?'İlçe seçin':'Önce il seçin'));
+    ilceS.appendChild(opt('',T(l.length?'İlçe seçin':'Önce il seçin')));
     l.forEach(function(x){ilceS.appendChild(opt(x))});
     ilceS.disabled=!l.length;
     if(l.length===1)ilceS.value=l[0];
@@ -82,6 +87,11 @@
   ilS.addEventListener('change',function(){ilceDoldur();ilS.classList.remove('bad')});
   ilceS.addEventListener('change',function(){ilceS.classList.remove('bad')});
   ilS.value='İstanbul';ilceDoldur();
+  hooks.push(function(){
+    ilS.options[0].textContent=T('İl seçin');
+    var l=ILL[ilS.value]||[];
+    if(ilceS.options[0]&&ilceS.options[0].value==='')ilceS.options[0].textContent=T(l.length?'İlçe seçin':'Önce il seçin');
+  });
 
   // ---- Hızlı fiyat talebi → WhatsApp ----
   var q=$('#quick');
@@ -99,7 +109,15 @@
   });
 
   // ---- Rulo hesaplayıcı (tüm ölçüler cm) ----
-  var c=$('#calc');
+  var c=$('#calc'),son=null;
+  var KISA='Girdiğiniz rulo boyu bu yükseklik için yetmiyor görünüyor. Değerleri kontrol edin ya da bize yazın, birlikte bakalım.';
+  var SONUC='{s} şerit gerekiyor, bir rulodan {p} şerit çıkıyor. Kapı/pencere payı ve hatalı kesim hesaba katılmadı; kesin sayı yerinde ölçüyle netleşir.';
+  function sonucYaz(){
+    if(!son)return;
+    $('#rn').textContent=son.rulo||'—';
+    $('#rt').textContent=son.rulo?T(SONUC).replace('{s}',son.serit).replace('{p}',son.ruloBasi):T(KISA);
+  }
+  hooks.push(sonucYaz);
   c.addEventListener('submit',function(e){
     e.preventDefault();
     var f=c.elements,en=sayi(f.en.value),boy=sayi(f.boy.value),re=sayi(f.re.value),rb=sayi(f.rb.value),dt=parseFloat(String(f.dt.value||'0').replace(',','.'))||0;
@@ -111,15 +129,14 @@
     var ruloBasi=Math.floor(rb/seritBoy);        // bir rulodan çıkan şerit
     var out=$('#result');
     if(ruloBasi<1){
-      $('#rn').textContent='—';
-      $('#rt').textContent='Girdiğiniz rulo boyu bu yükseklik için yetmiyor görünüyor. Değerleri kontrol edin ya da bize yazın, birlikte bakalım.';
+      son={rulo:0};
       $('#rwa').href=wa('Merhaba, rulo hesabı için yardım istiyorum. Duvar: '+fmt(en)+' cm x '+fmt(boy)+' cm.');
     }else{
       var rulo=Math.ceil(serit/ruloBasi);
-      $('#rn').textContent=rulo;
-      $('#rt').textContent=serit+' şerit gerekiyor, bir rulodan '+ruloBasi+' şerit çıkıyor. Kapı/pencere payı ve hatalı kesim hesaba katılmadı; kesin sayı yerinde ölçüyle netleşir.';
+      son={rulo:rulo,serit:serit,ruloBasi:ruloBasi};
       $('#rwa').href=wa('Merhaba, duvar kâğıdı uygulaması için fiyat almak istiyorum.\nDuvar: toplam '+fmt(en)+' cm x '+fmt(boy)+' cm yükseklik\nRulo: '+fmt(re)+' cm x '+fmt(rb)+' cm'+(dt?', desen tekrarı '+fmt(dt)+' cm':'')+'\nHesaplanan: yaklaşık '+rulo+' rulo');
     }
+    sonucYaz();
     out.hidden=false;out.style.animation='none';void out.offsetWidth;out.style.animation='';
     out.scrollIntoView({block:'nearest',behavior:'smooth'});
   });
@@ -127,12 +144,14 @@
 
   // ---- Galeri: daha fazla + büyütme ----
   var more=$('#more');
+  function moreYaz(){more.textContent=T(more.getAttribute('aria-expanded')==='true'?'Daha az göster':'Tüm görselleri göster')}
   more.onclick=function(){
     var acik=more.getAttribute('aria-expanded')==='true';
     document.querySelectorAll('.more-t').forEach(function(t){t.hidden=acik});
     more.setAttribute('aria-expanded',!acik);
-    more.textContent=acik?'Tüm görselleri göster':'Daha az göster';
+    moreYaz();
   };
+  hooks.push(moreYaz);
   var lb=$('#lb'),lbi=lb.querySelector('img');
   document.querySelectorAll('[data-lb]').forEach(function(a){
     a.addEventListener('click',function(e){e.preventDefault();lbi.src=a.href;lbi.alt=a.querySelector('img').alt;lb.hidden=false});
@@ -141,10 +160,13 @@
 
   // ---- Numarayı kopyala ----
   var cp=$('#copy');
+  function kopyaYaz(){cp.textContent=T('Numarayı kopyala')}
+  hooks.push(kopyaYaz);
   cp.onclick=function(){
-    var n=cp.dataset.num,ok=function(){cp.textContent='Kopyalandı ✓';setTimeout(function(){cp.textContent='Numarayı kopyala'},1800)};
+    var n=cp.dataset.num,ok=function(){cp.textContent=T('Kopyalandı ✓');setTimeout(kopyaYaz,1800)};
     if(navigator.clipboard)navigator.clipboard.writeText(n).then(ok,function(){cp.textContent=n});else cp.textContent=n;
   };
 
   $('#y').textContent=new Date().getFullYear();
+  // i18n.js DOMContentLoaded'da seçili dili uygular; yenileyiciler o sırada çalışır.
 })();
